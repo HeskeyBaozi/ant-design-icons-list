@@ -5,7 +5,20 @@
   "repository": "https://github.com/HeskeyBaozi/ant-design-icons-list",
   "author": "HeskeyBaozi <hezhiyu233@foxmail.com>",
   "license": "MIT",
+  "scripts": {
+    "g": "npm run generate",
+    "generate": "cross-env node --require ts-node/register/transpile-only scripts/generate.ts ",
+    "tsc": "tsc --noEmit"
+  },
   "dependencies": {
-    "@ant-design/icons-svg": "^4.0.0-rc.0"
+    "@ant-design/icons-svg": "^4.0.0-rc.0",
+    "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.149",
+    "@types/node": "^13.1.7",
+    "cross-env": "^6.0.3",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.7.4"
   }
 }
