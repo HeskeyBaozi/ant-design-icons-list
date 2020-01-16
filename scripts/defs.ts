@@ -18,10 +18,15 @@ import {
   slice,
   curryRight
 } from 'lodash/fp';
-import btoa from 'btoa';
 
 const themeOrder: ThemeType[] = ['filled', 'outlined', 'twotone'];
 const placeholder = '-';
+const username = 'HeskeyBaozi';
+const projectname = 'ant-design-icons-list';
+const branch = 'master';
+const pathTo = 'inline';
+import { writeFileSync } from 'fs';
+import { resolve } from 'path';
 
 const themeOrderMapFn: (theme: string) => number = memoize(
   (theme) => compose(invert, toPlainObject)(themeOrder)[theme]
@@ -37,8 +42,17 @@ const defTransform: (defs: IconDefinition[]) => string[] = flow(
           height: '70'
         }
       }),
-      btoa,
-      (base64: string) => `![${def.name}-${def.theme}](data:image/svg+xml;base64,${base64})`
+      // effects
+      (SVG: string) => {
+        writeFileSync(
+          resolve(__dirname, `../${pathTo}/${def.name}-${def.theme}.svg`),
+          SVG,
+          'utf8'
+        );
+        return `![${def.name}-${def.theme}](https://raw.githubusercontent.com/${username}/${projectname}/${branch}/${pathTo}/${def.name}-${def.theme}.svg)`;
+      }
+      // btoa,
+      // (base64: string) => `![${def.name}-${def.theme}](data:image/svg+xml;base64,${base64})`
     )(def)
   ),
   concat(
