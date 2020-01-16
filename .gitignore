@@ -25,7 +25,6 @@ _site/
 .cache
 public
 src
-inline-svg
 !docs/inline-svg
 es
 lib
