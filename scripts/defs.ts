@@ -49,7 +49,7 @@ const defTransform: (defs: IconDefinition[]) => string[] = flow(
           SVG,
           'utf8'
         );
-        return `![${def.name}-${def.theme}](https://raw.githubusercontent.com/${username}/${projectname}/${branch}/${pathTo}/${def.name}-${def.theme}.svg)`;
+        return `![${def.name}-${def.theme}](/${username}/${projectname}/raw/${branch}/${pathTo}/${def.name}-${def.theme}.svg?sanitize=true)`;
       }
       // btoa,
       // (base64: string) => `![${def.name}-${def.theme}](data:image/svg+xml;base64,${base64})`
