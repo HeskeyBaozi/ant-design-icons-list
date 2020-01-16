@@ -13,7 +13,10 @@ const transformToContent = flow(
   join('\n')
 );
 
-async function generate({ tplPath, outputPath }: GenerateOptions) {
+async function generate({
+  tplPath,
+  outputPath
+}: GenerateOptions): Promise<void> {
   const withTemplate = template(await promises.readFile(tplPath, 'utf8'));
   const content = transformToContent(iconsTable);
   await promises.writeFile(outputPath, withTemplate({ content }), 'utf8');
