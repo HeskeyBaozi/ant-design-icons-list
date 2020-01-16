@@ -16,8 +16,9 @@ import {
   fill,
   __,
   slice,
-  join
+  curryRight
 } from 'lodash/fp';
+import btoa from 'btoa';
 
 const themeOrder: ThemeType[] = ['filled', 'outlined', 'twotone'];
 const placeholder = '-';
@@ -28,13 +29,17 @@ const themeOrderMapFn: (theme: string) => number = memoize(
 
 const defTransform: (defs: IconDefinition[]) => string[] = flow(
   map<IconDefinition, string>((def) =>
-    renderIconDefinitionToSVGElement(def, {
-      extraSVGAttrs: {
-        xmlns: 'http://www.w3.org/2000/svg',
-        width: '70',
-        height: '70'
-      }
-    })
+    flow(
+      curryRight(renderIconDefinitionToSVGElement)({
+        extraSVGAttrs: {
+          xmlns: 'http://www.w3.org/2000/svg',
+          width: '70',
+          height: '70'
+        }
+      }),
+      btoa,
+      (base64: string) => `<img src="data:image/svg+xml;base64,${base64}"/>`
+    )(def)
   ),
   concat(
     __,
