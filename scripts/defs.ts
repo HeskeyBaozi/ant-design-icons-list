@@ -12,11 +12,10 @@ import {
   toPlainObject,
   memoize,
   flatten,
-  concat,
-  fill,
+  find,
   __,
-  slice,
-  curryRight
+  curryRight,
+  defaultTo
 } from 'lodash/fp';
 
 const themeOrder: ThemeType[] = ['filled', 'outlined', 'twotone'];
@@ -32,34 +31,31 @@ const themeOrderMapFn: (theme: string) => number = memoize(
   (theme) => compose(invert, toPlainObject)(themeOrder)[theme]
 );
 
-const defTransform: (defs: IconDefinition[]) => string[] = flow(
-  map<IconDefinition, string>((def) =>
-    flow(
-      curryRight(renderIconDefinitionToSVGElement)({
-        extraSVGAttrs: {
-          xmlns: 'http://www.w3.org/2000/svg',
-          width: '70',
-          height: '70'
-        }
-      }),
-      // effects
-      (SVG: string) => {
-        writeFileSync(
-          resolve(__dirname, `../${pathTo}/${def.name}-${def.theme}.svg`),
-          SVG,
-          'utf8'
-        );
-        return `![${def.name}-${def.theme}](https://raw.githubusercontent.com/${username}/${projectname}/${branch}/${pathTo}/${def.name}-${def.theme}.svg?sanitize=true)`;
-      }
-      // btoa,
-      // (base64: string) => `![${def.name}-${def.theme}](data:image/svg+xml;base64,${base64})`
-    )(def)
-  ),
-  concat(
-    __,
-    fill(0, themeOrder.length, __, Array(themeOrder.length))(placeholder)
-  ),
-  slice(0, themeOrder.length)
+const defTransform: (defs: (string | IconDefinition)[]) => string[] = flow(
+  map<string | IconDefinition, string>((def) =>
+    typeof def === 'string'
+      ? def
+      : flow(
+          curryRight(renderIconDefinitionToSVGElement)({
+            extraSVGAttrs: {
+              xmlns: 'http://www.w3.org/2000/svg',
+              width: '70',
+              height: '70'
+            }
+          }),
+          // effects
+          (SVG: string) => {
+            writeFileSync(
+              resolve(__dirname, `../${pathTo}/${def.name}-${def.theme}.svg`),
+              SVG,
+              'utf8'
+            );
+            return `![${def.name}-${def.theme}](https://raw.githubusercontent.com/${username}/${projectname}/${branch}/${pathTo}/${def.name}-${def.theme}.svg?sanitize=true)`;
+          }
+          // btoa,
+          // (base64: string) => `![${def.name}-${def.theme}](data:image/svg+xml;base64,${base64})`
+        )(def)
+  )
 );
 
 const transformToIconsTable = flow(
@@ -68,10 +64,21 @@ const transformToIconsTable = flow(
   sortBy(([_, defs]: [string, IconDefinition[]]) => 0 - defs.length),
   map(([name, defs]: [string, IconDefinition[]]) => [
     name,
-    sortBy(({ theme }: IconDefinition) => themeOrderMapFn(theme))(defs)
+    flow(
+      sortBy(({ theme }: IconDefinition) => themeOrderMapFn(theme)),
+      (defs: IconDefinition[]): (string | IconDefinition)[] =>
+        flow(
+          map((theme: string) =>
+            flow(
+              find((def: IconDefinition) => def.theme === theme),
+              defaultTo<string | IconDefinition>(placeholder)
+            )(defs)
+          )
+        )(themeOrder)
+    )(defs)
   ]),
-  map(([name, defs]: [string, IconDefinition[]]) =>
-    flatten([name, defTransform(defs)])
+  map(([name, defsOrDash]: [string, (string | IconDefinition)[]]) =>
+    flatten([name, defTransform(defsOrDash)])
   )
 );
 
