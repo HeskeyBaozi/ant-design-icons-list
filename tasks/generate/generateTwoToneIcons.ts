@@ -48,7 +48,9 @@ export default function generateTwoToneIcons(): NodeJS.ReadWriteStream {
   return merge(
     iconDefinitionStream
       .pipe(clone())
-      .pipe(inlineSVG())
+      .pipe(
+        inlineSVG({ extraSVGAttrs: { xmlns: 'http://www.w3.org/2000/svg' } })
+      )
       .pipe(dest(getInlinePathByTheme(twotone))),
     iconDefinitionStream
       .pipe(

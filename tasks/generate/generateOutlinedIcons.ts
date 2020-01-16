@@ -44,7 +44,9 @@ export default function generateOutlinedIcons(): NodeJS.ReadWriteStream {
   return merge(
     iconDefinitionStream
       .pipe(clone())
-      .pipe(inlineSVG())
+      .pipe(
+        inlineSVG({ extraSVGAttrs: { xmlns: 'http://www.w3.org/2000/svg' } })
+      )
       .pipe(dest(getInlinePathByTheme(outlined))),
     iconDefinitionStream
       .pipe(

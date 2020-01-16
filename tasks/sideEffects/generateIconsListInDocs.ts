@@ -5,6 +5,7 @@ import { set, get } from 'lodash';
 import { oldIconNames, ThemeType } from '../../build/constants';
 import gulpTemplate from 'gulp-template';
 import { templateSettings } from 'lodash';
+import rename from 'gulp-rename';
 
 export default function generateIconsListInDocs() {
   const acc: {
@@ -18,23 +19,21 @@ export default function generateIconsListInDocs() {
   const themes: ThemeType[] = ['filled', 'outlined', 'twotone'];
 
   for (const theme of themes) {
-    sync(`docs/inline-svg/${theme}/*.svg`, { cwd: process.cwd() }).forEach(
-      (p) => {
-        const parsed = parse(p);
-        let name = parsed.name;
-        if (oldIconNames.includes(name)) {
-          name = `${name} (< 3.9)`;
-        }
-        set(
-          acc,
-          [name, theme],
-          `<img width="70" height="70" src="./inline-svg/${theme}/${parsed.base}" alt="${name}" />`
-        );
+    sync(`inline-svg/${theme}/*.svg`, { cwd: process.cwd() }).forEach((p) => {
+      const parsed = parse(p);
+      let name = parsed.name;
+      if (oldIconNames.includes(name)) {
+        name = `${name} (< 3.9)`;
       }
-    );
+      set(
+        acc,
+        [name, theme],
+        `<img width="70" height="70" src="../inline-svg/${theme}/${parsed.base}" alt="${name}" />`
+      );
+    });
   }
 
-  let content = '';
+  let content = `| Name | Filled | Outlined | TwoTone|\n|:----:|:------:|:--------:|:------:|\n`;
   Object.keys(acc).forEach((name) => {
     const target = acc[name]!;
     const row = themes.map((theme) => get(target, theme, ' - '));
@@ -43,5 +42,10 @@ export default function generateIconsListInDocs() {
 
   return src('build/templates/list.md.template')
     .pipe(gulpTemplate({ content }, templateSettings))
+    .pipe(
+      rename((file) => {
+        file.extname = '';
+      })
+    )
     .pipe(dest('docs'));
 }
