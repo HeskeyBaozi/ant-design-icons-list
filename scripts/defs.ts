@@ -38,7 +38,7 @@ const defTransform: (defs: IconDefinition[]) => string[] = flow(
         }
       }),
       btoa,
-      (base64: string) => `<img src="data:image/svg+xml;base64,${base64}"/>`
+      (base64: string) => `![${def.name}-${def.theme}](data:image/svg+xml;base64,${base64})`
     )(def)
   ),
   concat(
